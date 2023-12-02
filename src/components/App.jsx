@@ -25,7 +25,7 @@ export const App = () => {
   }, [contacts]);
 
   const inputChangeValue = evt => {
-    const { name, value } = evt.target;
+    const { value } = evt.target;
     setFilter(value);
   };
 
