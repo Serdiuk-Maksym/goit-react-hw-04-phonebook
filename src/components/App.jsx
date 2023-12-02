@@ -1,59 +1,49 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect } from 'react';
 import { nanoid } from 'nanoid';
 import { ContactForm } from './ContactForm/ContactForm';
 import { Filter } from './Filter/Filter';
 import { ContactList } from './ContactList/ContactList';
 import { AppSection, TitleOne } from './APP.styled';
 
-export class App extends Component {
-  state = {
-    contacts: [
-      { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
-      { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
-      { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
-      { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
-    ],
+export const App = () => {
+  const [contacts, setContacts] = useState([
+    { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
+    { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
+    { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
+    { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
+  ]);
 
-    filter: '',
-  };
+  const [filter, setFilter] = useState('');
 
-  componentDidMount() {
+  useEffect(() => {
     const localContacts = localStorage.getItem('contacts');
-    if (localContacts) this.setState({ contacts: JSON.parse(localContacts) });
-  }
+    if (localContacts) setContacts(JSON.parse(localContacts));
+  }, []);
 
-  componentDidUpdate(prevProps, prevState) {
-    if (prevState.contacts !== this.state.contacts) {
-      localStorage.setItem('contacts', JSON.stringify(this.state.contacts));
-    }
-  }
+  useEffect(() => {
+    localStorage.setItem('contacts', JSON.stringify(contacts));
+  }, [contacts]);
 
-  inputChangeValue = evt => {
-    return this.setState({
-      [evt.target.name]: evt.target.value,
-    });
+  const inputChangeValue = evt => {
+    const { name, value } = evt.target;
+    setFilter(value);
   };
 
-  formSubmitHandler = data => {
-    return this.setState(prevValue => ({
-      contacts: [{ id: nanoid(), ...data }, ...prevValue.contacts],
-    }));
+  const formSubmitHandler = data => {
+    setContacts(prevContacts => [{ id: nanoid(), ...data }, ...prevContacts]);
   };
 
-  calculateFilteredContacts = () => {
-    const { contacts } = this.state;
-    const normalizedFilter = this.state.filter.toLowerCase();
-    return contacts.filter(contact => {
-      return contact.name.toLowerCase().includes(normalizedFilter, 0);
-    });
-  };
-
-  formSubmitSearchHandler = data => {
-    const searchResult = this.state.contacts.find(
-      contact => contact.name === data.name
+  const calculateFilteredContacts = () => {
+    const normalizedFilter = filter.toLowerCase();
+    return contacts.filter(contact =>
+      contact.name.toLowerCase().includes(normalizedFilter)
     );
+  };
+
+  const formSubmitSearchHandler = data => {
+    const searchResult = contacts.find(contact => contact.name === data.name);
     if (!searchResult) {
-      this.formSubmitHandler(data);
+      formSubmitHandler(data);
       return true;
     } else {
       alert(`${data.name} is already in contacts`);
@@ -61,22 +51,21 @@ export class App extends Component {
     }
   };
 
-  deleteItem = contactId => {
-    this.setState(prevValue => ({
-      contacts: prevValue.contacts.filter(item => item.id !== contactId),
-    }));
+  const deleteItem = contactId => {
+    setContacts(prevContacts =>
+      prevContacts.filter(item => item.id !== contactId)
+    );
   };
 
-  render() {
-    const visibleContacts = this.calculateFilteredContacts();
-    return (
-      <AppSection>
-        <TitleOne>Phonebook</TitleOne>
-        <ContactForm onSubmitHandler={this.formSubmitSearchHandler} />
-        <h2>Contacts</h2>
-        <Filter filter={this.state.filter} onChange={this.inputChangeValue} />
-        <ContactList list={visibleContacts} onDeleteItem={this.deleteItem} />
-      </AppSection>
-    );
-  }
-}
+  const visibleContacts = calculateFilteredContacts();
+
+  return (
+    <AppSection>
+      <TitleOne>Phonebook</TitleOne>
+      <ContactForm onSubmitHandler={formSubmitSearchHandler} />
+      <h2>Contacts</h2>
+      <Filter filter={filter} onChange={inputChangeValue} />
+      <ContactList list={visibleContacts} onDeleteItem={deleteItem} />
+    </AppSection>
+  );
+};
