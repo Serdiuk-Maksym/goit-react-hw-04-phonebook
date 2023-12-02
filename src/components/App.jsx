@@ -61,7 +61,7 @@ export const App = () => {
 
   return (
     <AppSection>
-      <TitleOne>Phonebook</TitleOne>
+      <TitleOne>PhoneBook</TitleOne>
       <ContactForm onSubmitHandler={formSubmitSearchHandler} />
       <h2>Contacts</h2>
       <Filter filter={filter} onChange={inputChangeValue} />
