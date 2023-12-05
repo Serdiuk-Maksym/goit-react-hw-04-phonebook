@@ -16,8 +16,10 @@ export const App = () => {
   const [filter, setFilter] = useState('');
 
   useEffect(() => {
-    const localContacts = localStorage.getItem('contacts');
-    if (localContacts) setContacts(JSON.parse(localContacts));
+    setContacts(prevContacts => {
+      const localContacts = localStorage.getItem('contacts');
+      return localContacts ? JSON.parse(localContacts) : prevContacts;
+    });
   }, []);
 
   useEffect(() => {
